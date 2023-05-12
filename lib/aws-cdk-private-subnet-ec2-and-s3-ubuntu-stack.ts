@@ -14,17 +14,24 @@ export class AwsCdkTemplateStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AwsCdkTemplateStackProps) {
     super(scope, id, props);
 
+    // S3 bucket
+    const s3_bucket = new cdk.aws_s3.Bucket(this, 'test-bucket-to-mount-from-ec2', {
+      bucketName: 'test-bucket-to-mount-from-ec2', // Bucket Name は user-data.yaml のマウント設定でも利用しているため，揃える必要がある．aws s3 ls はできるので，ハッシュっぽい名前にするなら，例えば aws s3 ls | grep 'BucketName' などで抽出する．あるいは，値をパラメータストアとかに入れておいて読み込む
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
     // VPC
-//    const nat_instance = ec2.NatProvider.instance({
-//      instanceType: new InstanceType('t3a.nano'),
-//      machineImage: new NatInstanceImage(),
-//      defaultAllowedTraffic: ec2.NatTrafficDirection.OUTBOUND_ONLY,
-//    });
+    const nat_instance = ec2.NatProvider.instance({
+      instanceType: new InstanceType('t3a.nano'),
+      machineImage: new NatInstanceImage(),
+      defaultAllowedTraffic: ec2.NatTrafficDirection.OUTBOUND_ONLY,
+    });
     const vpc = new ec2.Vpc(this, props.prj_name+'-'+this.constructor.name+'-vpc_for_ec2_and_ssm', {
       cidr: '10.0.0.0/16',
-      natGateways: 0,
-//      natGateways: 1,
-//      natGatewayProvider: nat_instance,
+//      natGateways: 0,
+      natGateways: 1,
+      natGatewayProvider: nat_instance,
       subnetConfiguration: [
         {
           name: 'Public',
@@ -101,7 +108,7 @@ export class AwsCdkTemplateStack extends cdk.Stack {
       securityGroup: ec2_sg,
     });
 
-//    nat_instance.connections.allowFrom(ec2_sg, ec2.Port.allTraffic());
+    nat_instance.connections.allowFrom(ec2_sg, ec2.Port.allTraffic());
 
     //---
   }
