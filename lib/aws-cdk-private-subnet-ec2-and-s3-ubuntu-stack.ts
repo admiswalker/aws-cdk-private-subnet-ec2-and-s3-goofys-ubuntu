@@ -20,6 +20,10 @@ export class AwsCdkTemplateStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
+    const ssmParameter = new cdk.aws_ssm.StringParameter(this, 'aws_s3_bucket_name', {
+      parameterName: '/s3_bucket_name_to_mount_on_ec2/001',
+      stringValue: s3_bucket.bucketName,
+    });
 
     // VPC
     const nat_instance = ec2.NatProvider.instance({
@@ -52,6 +56,8 @@ export class AwsCdkTemplateStack extends cdk.Stack {
         // for SSM
         iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'),
         iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchAgentAdminPolicy'),
+        // for Parameter Store
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMReadOnlyAccess'),
         // for S3 Access from EC2
         iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonS3FullAccess'),
       ],

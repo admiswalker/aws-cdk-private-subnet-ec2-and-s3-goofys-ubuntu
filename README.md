@@ -125,6 +125,10 @@ sudo cat /var/log/cloud-init-output.log
 
 - [大切なことはすべてUbuntuが教えてくれた　無人アップグレードを知りましょう](https://qiita.com/Brutus/items/b264384361d08b7475f6)
 
+## S3 の Bucket 名の受け渡し
+
+- [CDKでスタック間のパラメーターを受け渡す5つの方法とケース別の最適解について考えてみた](https://dev.classmethod.jp/articles/best-way-to-reference-parameters-in-cdk/)
+
 ---
 
 ## 付録

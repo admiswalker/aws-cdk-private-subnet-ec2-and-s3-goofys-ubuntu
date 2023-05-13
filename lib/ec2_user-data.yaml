@@ -10,6 +10,13 @@ users: # run by "users-groups" option
     ssh-authorized-keys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGsHMbqflou/Pow660rnIJq8wdtCnoJhzZfh6BAOWrxQ admis@admis-MS-7A34
 runcmd: # run by "scripts-user" option
+  - echo ""
+  - echo ""
+  - echo "--- begin --- set parameter ----------------------------------------------------"
+  - DEPLOY_REGION=ap-northeast-1
+  - echo "------------------------------------------------------------------------ end ---"
+  - echo ""
+  - echo ""
   - echo "--- begin --- Update Package List ----------------------------------------------"
   - sudo apt-get update
   - echo "------------------------------------------------------------------------ end ---"
@@ -36,10 +43,13 @@ runcmd: # run by "scripts-user" option
   - echo ""
   - echo ""
   - echo "--- begin --- Automatic mount setting of AWS S3 and Mounting s3 ----------------"
+  - echo "Get bucket name from parameter store"
+  - PARAMETER_STORE_PATH=/s3_bucket_name_to_mount_on_ec2/001
+  - BUCKET_NAME=$(aws ssm get-parameter --name ${PARAMETER_STORE_PATH} --query "Parameter.Value" --region ${DEPLOY_REGION} | tr -d '"')
+  - echo ""
   - echo "Mount bucket setting 01"
-  - BUCKET_NAME=test-bucket-to-mount-from-ec2
   - sudo mkdir /mnt/${BUCKET_NAME}
-  - sudo sh -c "echo '/usr/local/bin/goofys#${BUCKET_NAME} /mnt/${BUCKET_NAME} fuse _netdev,allow_other,--dir-mode=0775,--file-mode=0666,--uid=1000,--gid=1000,--region=ap-northeast-1 0 0' >> /etc/fstab"
+  - sudo sh -c "echo '/usr/local/bin/goofys#${BUCKET_NAME} /mnt/${BUCKET_NAME} fuse _netdev,allow_other,--dir-mode=0775,--file-mode=0666,--uid=1000,--gid=1000,--region=${DEPLOY_REGION} 0 0' >> /etc/fstab"
   - echo ""
   - echo "Mount"
   - sudo mount -fav
